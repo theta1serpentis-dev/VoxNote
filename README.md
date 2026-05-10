@@ -67,3 +67,4 @@ Aplikacja nie wysyła go nigdzie poza bezpośrednie zapytania do
 ## Licencja
 
 Kod do dowolnego użytku (MIT-style). Brak gwarancji.
+ 
