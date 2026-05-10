@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#121212" />
+<title>VoxNote</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== EKRAN GŁÓWNY ===== -->
+<main id="screen-main" class="screen">
+  <header class="topbar">
+    <input id="session-name" class="session-input" type="text" autocomplete="off" />
+    <button id="btn-settings" class="icon-btn" aria-label="Ustawienia">⚙️</button>
+  </header>
+
+  <section class="template-row">
+    <button class="tpl-btn" data-tpl="lawyer">⚖️ Prawnik / Spotkanie</button>
+    <button class="tpl-btn" data-tpl="trip">🗺️ Wycieczka / Notatki</button>
+  </section>
+
+  <section class="rec-area">
+    <button id="btn-record" class="rec-btn rec-idle" aria-label="Nagrywaj">
+      <span class="rec-icon" aria-hidden="true"></span>
+      <span class="rec-label">Naciśnij</span>
+    </button>
+    <p id="live-preview" class="live-preview"></p>
+  </section>
+
+  <section class="notes-section">
+    <div class="notes-counter">Zapisano: <span id="notes-count">0</span> notatek</div>
+    <ul id="notes-list" class="notes-list"></ul>
+  </section>
+
+  <section class="action-panel" id="action-panel">
+    <button id="btn-summarize" class="action-btn primary" disabled>✨ Podsumuj przez AI</button>
+    <button id="btn-export" class="action-btn" disabled>📤 Eksportuj notatki</button>
+    <button id="btn-new-session" class="action-btn danger" disabled>🗑️ Nowa sesja</button>
+  </section>
+</main>
+
+<!-- ===== EKRAN PODSUMOWANIA ===== -->
+<main id="screen-summary" class="screen hidden">
+  <header class="topbar">
+    <button id="btn-back" class="icon-btn" aria-label="Wróć">←</button>
+    <div class="summary-head">
+      <div id="summary-session" class="summary-session"></div>
+      <div id="summary-template" class="summary-template"></div>
+    </div>
+  </header>
+  <section class="summary-body">
+    <pre id="summary-content" class="summary-content"></pre>
+  </section>
+  <section class="action-panel">
+    <button id="btn-share-summary" class="action-btn primary">📤 Udostępnij podsumowanie</button>
+    <button id="btn-share-all" class="action-btn">📤 Udostępnij wszystko</button>
+    <button id="btn-back-bottom" class="action-btn">← Wróć do notatek</button>
+  </section>
+</main>
+
+<!-- ===== MODAL USTAWIEŃ ===== -->
+<div id="modal-settings" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Ustawienia</h2>
+    <label for="api-key-input" class="lbl">Klucz API Claude</label>
+    <input id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
+    <p id="api-key-status" class="hint">⚠️ Brak klucza</p>
+    <p class="hint small">Klucz przechowywany lokalnie na urządzeniu.</p>
+    <div class="modal-actions">
+      <button id="btn-save-key" class="action-btn primary">Zapisz</button>
+      <button id="btn-close-settings" class="action-btn">Zamknij</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SPINNER ===== -->
+<div id="spinner" class="spinner-overlay hidden">
+  <div class="spinner"></div>
+  <p>Generuję podsumowanie...</p>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
