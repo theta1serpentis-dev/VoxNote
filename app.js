@@ -15,7 +15,7 @@ const LS = {
 
 const TEMPLATES = {
   lawyer: {
-    label: '⚖️ Prawnik / Spotkanie',
+    label: '💼 Spotkanie',
     prompt: `Przeanalizuj poniższe notatki głosowe ze spotkania i przygotuj zwięzłe podsumowanie po polsku według struktury:
 
 📅 INFORMACJE PODSTAWOWE
@@ -37,7 +37,7 @@ const TEMPLATES = {
 Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`
   },
   trip: {
-    label: '🗺️ Wycieczka / Notatki',
+    label: '📝 Notatki',
     prompt: `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
 
 📍 MIEJSCE I KONTEKST
@@ -65,6 +65,7 @@ let lastSummary = '';
 
 let recognition = null;
 let isRecording = false;
+let committedTranscript = '';
 let finalTranscript = '';
 let interimTranscript = '';
 
@@ -214,18 +215,23 @@ function startRecording() {
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
+  committedTranscript = '';
   finalTranscript = '';
   interimTranscript = '';
   livePreview.textContent = '';
 
   recognition.onresult = (ev) => {
-    interimTranscript = '';
-    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+    let finals = '';
+    let interim = '';
+    for (let i = 0; i < ev.results.length; i++) {
       const res = ev.results[i];
-      if (res.isFinal) finalTranscript += res[0].transcript + ' ';
-      else interimTranscript += res[0].transcript;
+      const t = res[0].transcript;
+      if (res.isFinal) finals += t + ' ';
+      else interim += t;
     }
-    livePreview.textContent = (finalTranscript + interimTranscript).trim();
+    finalTranscript = finals;
+    interimTranscript = interim;
+    livePreview.textContent = (committedTranscript + finalTranscript + interimTranscript).trim();
   };
 
   recognition.onerror = (e) => {
@@ -239,6 +245,10 @@ function startRecording() {
   };
 
   recognition.onend = () => {
+    committedTranscript = (committedTranscript + finalTranscript).replace(/\s+/g, ' ');
+    if (!committedTranscript.endsWith(' ')) committedTranscript += ' ';
+    finalTranscript = '';
+    interimTranscript = '';
     if (isRecording) {
       // Restart for very long sessions if API auto-stopped
       try { recognition.start(); } catch {}
@@ -259,7 +269,7 @@ function stopRecording() {
   try { recognition && recognition.stop(); } catch {}
   setRecUI(false);
 
-  const text = (finalTranscript + interimTranscript).trim();
+  const text = (committedTranscript + finalTranscript + interimTranscript).replace(/\s+/g, ' ').trim();
   if (!text) {
     livePreview.textContent = '';
     toast('Nic nie nagrano — spróbuj ponownie');
@@ -272,6 +282,7 @@ function stopRecording() {
   renderNotes();
   refreshActionPanel();
 
+  committedTranscript = '';
   finalTranscript = '';
   interimTranscript = '';
   livePreview.textContent = '';
