@@ -221,17 +221,29 @@ function startRecording() {
   livePreview.textContent = '';
 
   recognition.onresult = (ev) => {
-    let finals = '';
+    const finalsArr = [];
     let interim = '';
     for (let i = 0; i < ev.results.length; i++) {
       const res = ev.results[i];
-      const t = res[0].transcript;
-      if (res.isFinal) finals += t + ' ';
-      else interim += t;
+      const t = res[0].transcript.trim();
+      if (!t) continue;
+      if (res.isFinal) finalsArr.push(t);
+      else interim += res[0].transcript;
     }
-    finalTranscript = finals;
+    // Android Chrome quirk: emits multiple isFinal=true entries with growing prefix.
+    // Merge prefix-extending finals (replace), keep independent ones (append).
+    let merged = '';
+    for (const f of finalsArr) {
+      if (!merged) { merged = f; continue; }
+      const fLow = f.toLowerCase();
+      const mLow = merged.toLowerCase();
+      if (fLow.startsWith(mLow)) merged = f;
+      else if (mLow.endsWith(fLow)) { /* already included */ }
+      else merged += ' ' + f;
+    }
+    finalTranscript = merged ? merged + ' ' : '';
     interimTranscript = interim;
-    livePreview.textContent = (committedTranscript + finalTranscript + interimTranscript).trim();
+    livePreview.textContent = (committedTranscript + finalTranscript + interimTranscript).replace(/\s+/g, ' ').trim();
   };
 
   recognition.onerror = (e) => {
