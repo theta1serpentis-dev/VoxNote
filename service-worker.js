@@ -1,4 +1,4 @@
-const CACHE_NAME = 'voxnote-v3';
+const CACHE_NAME = 'voxnote-v4';
 const ASSETS = [
   './',
   './index.html',

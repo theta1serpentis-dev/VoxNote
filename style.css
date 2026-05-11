@@ -131,6 +131,11 @@ body {
   background: #555;
 }
 
+.rec-initializing {
+  background: #F9A825;
+  animation: pulse-init 0.9s ease-in-out infinite;
+}
+
 .rec-recording {
   background: #E53935;
   animation: pulse 1.4s ease-in-out infinite;
@@ -139,6 +144,11 @@ body {
 @keyframes pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.5); }
   50% { box-shadow: 0 0 0 18px rgba(229, 57, 53, 0); }
+}
+
+@keyframes pulse-init {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 168, 37, 0.55); }
+  50% { box-shadow: 0 0 0 14px rgba(249, 168, 37, 0); }
 }
 
 .rec-icon {
@@ -155,6 +165,10 @@ body {
 
 .rec-recording .rec-icon {
   --mic-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='6' y='6' width='12' height='12' rx='2' fill='white'/></svg>");
+}
+
+.rec-initializing .rec-icon {
+  --mic-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z' fill='white'/></svg>");
 }
 
 .live-preview {

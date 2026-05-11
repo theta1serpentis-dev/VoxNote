@@ -107,6 +107,15 @@ function init() {
   refreshKeyStatus();
   bindEvents();
   registerSW();
+  prewarmMic();
+}
+
+async function prewarmMic() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+  } catch { /* user denied or unavailable — ignore */ }
 }
 
 function bindEvents() {
@@ -246,6 +255,11 @@ function startRecording() {
     livePreview.textContent = (committedTranscript + finalTranscript + interimTranscript).replace(/\s+/g, ' ').trim();
   };
 
+  recognition.onstart = () => {
+    setRecUI('recording');
+    if (navigator.vibrate) navigator.vibrate(60);
+  };
+
   recognition.onerror = (e) => {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
       toast('Brak dostępu do mikrofonu');
@@ -270,8 +284,9 @@ function startRecording() {
   try {
     recognition.start();
     isRecording = true;
-    setRecUI(true);
+    setRecUI('initializing');
   } catch (err) {
+    setRecUI('idle');
     toast('Nie udało się rozpocząć nagrywania');
   }
 }
@@ -279,7 +294,7 @@ function startRecording() {
 function stopRecording() {
   isRecording = false;
   try { recognition && recognition.stop(); } catch {}
-  setRecUI(false);
+  setRecUI('idle');
 
   const text = (committedTranscript + finalTranscript + interimTranscript).replace(/\s+/g, ' ').trim();
   if (!text) {
@@ -302,10 +317,13 @@ function stopRecording() {
   if (navigator.vibrate) navigator.vibrate(200);
 }
 
-function setRecUI(rec) {
-  recBtn.classList.toggle('rec-recording', rec);
-  recBtn.classList.toggle('rec-idle', !rec);
-  recLabel.textContent = rec ? 'Nagrywa...' : 'Naciśnij';
+function setRecUI(state) {
+  recBtn.classList.toggle('rec-idle', state === 'idle');
+  recBtn.classList.toggle('rec-initializing', state === 'initializing');
+  recBtn.classList.toggle('rec-recording', state === 'recording');
+  if (state === 'recording') recLabel.textContent = 'Nagrywa...';
+  else if (state === 'initializing') recLabel.textContent = 'Czekaj...';
+  else recLabel.textContent = 'Naciśnij';
 }
 
 // ===== EXPORT / SHARE =====
