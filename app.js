@@ -9,36 +9,10 @@
 const LS = {
   notes: 'vn_notes',
   apiKey: 'vn_api_key',
-  sessionName: 'vn_session_name',
-  template: 'vn_template'
+  sessionName: 'vn_session_name'
 };
 
-const TEMPLATES = {
-  lawyer: {
-    label: '💼 Spotkanie',
-    prompt: `Przeanalizuj poniższe notatki głosowe ze spotkania i przygotuj zwięzłe podsumowanie po polsku według struktury:
-
-📅 INFORMACJE PODSTAWOWE
-- Uczestnicy (jeśli wspomniani):
-- Temat spotkania:
-
-⚖️ KLUCZOWE USTALENIA I FAKTY
-
-📋 ZOBOWIĄZANIA STRON
-
-⏰ TERMINY I DATY
-
-❓ KWESTIE OTWARTE / NIEJASNOŚCI
-
-➡️ NASTĘPNE KROKI
-
-⚠️ UWAGI DODATKOWE
-
-Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`
-  },
-  trip: {
-    label: '📝 Notatki',
-    prompt: `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
+const SUMMARY_PROMPT = `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
 
 📍 MIEJSCE I KONTEKST
 
@@ -53,14 +27,11 @@ Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`
 
 🔍 DO SPRAWDZENIA PÓŹNIEJ
 
-Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`
-  }
-};
+Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`;
 
 // ===== STATE =====
 let notes = loadNotes();
 let sessionName = localStorage.getItem(LS.sessionName) || defaultSessionName();
-let templateKey = localStorage.getItem(LS.template) || 'lawyer';
 let lastSummary = '';
 
 let recognition = null;
@@ -92,7 +63,6 @@ const spinner = $('spinner');
 const toastEl = $('toast');
 const summaryContent = $('summary-content');
 const summarySession = $('summary-session');
-const summaryTemplate = $('summary-template');
 const btnBack = $('btn-back');
 const btnBackBottom = $('btn-back-bottom');
 const btnShareSummary = $('btn-share-summary');
@@ -101,7 +71,6 @@ const btnShareAll = $('btn-share-all');
 // ===== INIT =====
 function init() {
   sessionInput.value = sessionName;
-  setActiveTemplate(templateKey);
   renderNotes();
   refreshActionPanel();
   refreshKeyStatus();
@@ -125,14 +94,6 @@ function bindEvents() {
     localStorage.setItem(LS.sessionName, sessionName);
   });
 
-  document.querySelectorAll('.tpl-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      templateKey = btn.dataset.tpl;
-      localStorage.setItem(LS.template, templateKey);
-      setActiveTemplate(templateKey);
-    });
-  });
-
   recBtn.addEventListener('click', toggleRecording);
 
   btnSummarize.addEventListener('click', summarize);
@@ -147,13 +108,6 @@ function bindEvents() {
   btnBackBottom.addEventListener('click', showMain);
   btnShareSummary.addEventListener('click', () => shareText(buildSummaryOnlyTxt(), filenameFor('-podsumowanie')));
   btnShareAll.addEventListener('click', () => shareText(buildCombinedTxt(), filenameFor('-pelne')));
-}
-
-// ===== TEMPLATES UI =====
-function setActiveTemplate(key) {
-  document.querySelectorAll('.tpl-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tpl === key);
-  });
 }
 
 // ===== NOTES =====
@@ -331,7 +285,6 @@ function buildExportTxt() {
   const lines = [];
   lines.push(`SESJA: ${sessionName}`);
   lines.push(`DATA: ${nowDateTime()}`);
-  lines.push(`SZABLON: ${TEMPLATES[templateKey].label}`);
   lines.push(`LICZBA NOTATEK: ${notes.length}`);
   lines.push('=====================================');
   lines.push('');
@@ -428,7 +381,7 @@ async function summarize() {
   }
 
   const formattedNotes = notes.map((n, i) => `NOTATKA ${i + 1} [${n.timestamp}]: ${n.text}`).join('\n');
-  const prompt = TEMPLATES[templateKey].prompt + '\n\n' + formattedNotes;
+  const prompt = SUMMARY_PROMPT + '\n\n' + formattedNotes;
 
   spinner.classList.remove('hidden');
 
@@ -487,7 +440,6 @@ async function summarize() {
 
 function showSummary() {
   summarySession.textContent = sessionName;
-  summaryTemplate.textContent = TEMPLATES[templateKey].label;
   summaryContent.textContent = lastSummary;
   screenMain.classList.add('hidden');
   screenSummary.classList.remove('hidden');

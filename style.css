@@ -75,29 +75,6 @@ body {
 
 .icon-btn:active { background: var(--surface-2); }
 
-/* ===== TEMPLATES ===== */
-.template-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.tpl-btn {
-  background: var(--surface);
-  color: var(--text);
-  border: 2px solid transparent;
-  padding: 12px 8px;
-  font-size: 15px;
-  border-radius: 10px;
-  min-height: 48px;
-  cursor: pointer;
-}
-
-.tpl-btn.active {
-  border-color: var(--accent);
-  background: var(--surface-2);
-}
-
 /* ===== REC ===== */
 .rec-area {
   display: flex;
@@ -283,11 +260,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.summary-template {
-  font-size: 13px;
-  color: var(--muted);
 }
 
 .summary-body {
