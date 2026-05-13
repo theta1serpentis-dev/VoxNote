@@ -1,4 +1,4 @@
-const CACHE_NAME = 'voxnote-v4';
+const CACHE_NAME = 'voxnote-v5-editorial';
 const ASSETS = [
   './',
   './index.html',
@@ -6,7 +6,9 @@ const ASSETS = [
   './app.js',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './fonts/inter-variable.woff2',
+  './fonts/fraunces-variable.woff2'
 ];
 
 self.addEventListener('install', (event) => {
