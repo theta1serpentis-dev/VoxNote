@@ -9,7 +9,9 @@
 const LS = {
   notes: 'vn_notes',
   apiKey: 'vn_api_key',
-  sessionName: 'vn_session_name'
+  sessionName: 'vn_session_name',
+  customPrompt: 'vn_custom_prompt',
+  templates: 'vn_templates'
 };
 
 const SUMMARY_PROMPT = `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
@@ -28,6 +30,20 @@ const SUMMARY_PROMPT = `Przeanalizuj poniższe notatki głosowe i przygotuj czyt
 🔍 DO SPRAWDZENIA PÓŹNIEJ
 
 Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`;
+
+const BUILTIN_TEMPLATE = {
+  id: 'builtin-notes',
+  label: '📝 Notatki',
+  prompt: SUMMARY_PROMPT,
+  builtin: true
+};
+
+function getTemplates() {
+  let custom = [];
+  try { custom = JSON.parse(localStorage.getItem(LS.templates)) || []; }
+  catch { custom = []; }
+  return [BUILTIN_TEMPLATE, ...custom];
+}
 
 // ===== STATE =====
 let notes = loadNotes();
@@ -67,6 +83,14 @@ const btnBack = $('btn-back');
 const btnBackBottom = $('btn-back-bottom');
 const btnShareSummary = $('btn-share-summary');
 const btnShareAll = $('btn-share-all');
+const modalSummarize = $('modal-summarize');
+const tplList = $('tpl-list');
+const customPromptInput = $('custom-prompt-input');
+const btnRunCustom = $('btn-run-custom');
+const btnCloseSummarize = $('btn-close-summarize');
+const btnDictatePrompt = $('btn-dictate-prompt');
+
+let dictation = null;
 
 // ===== INIT =====
 function init() {
@@ -96,7 +120,10 @@ function bindEvents() {
 
   recBtn.addEventListener('click', toggleRecording);
 
-  btnSummarize.addEventListener('click', summarize);
+  btnSummarize.addEventListener('click', openSummarizeModal);
+  btnRunCustom.addEventListener('click', runCustomPrompt);
+  btnCloseSummarize.addEventListener('click', closeSummarizeModal);
+  btnDictatePrompt.addEventListener('click', toggleDictateCustomPrompt);
   btnExport.addEventListener('click', exportNotes);
   btnNewSession.addEventListener('click', newSession);
 
@@ -368,8 +395,52 @@ function newSession() {
   toast('Nowa sesja rozpoczęta');
 }
 
+// ===== SUMMARIZE MODAL =====
+function openSummarizeModal() {
+  const key = localStorage.getItem(LS.apiKey);
+  if (!key) {
+    toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
+    return;
+  }
+  if (!navigator.onLine) {
+    toast('Brak połączenia z API — użyj przycisku Eksportuj i wklej notatki do Claude ręcznie');
+    return;
+  }
+
+  tplList.innerHTML = '';
+  getTemplates().forEach(tpl => {
+    const btn = document.createElement('button');
+    btn.className = 'tpl-pick';
+    btn.textContent = tpl.label;
+    btn.addEventListener('click', () => {
+      closeSummarizeModal();
+      runSummary(tpl.prompt);
+    });
+    tplList.appendChild(btn);
+  });
+
+  customPromptInput.value = localStorage.getItem(LS.customPrompt) || '';
+  modalSummarize.classList.remove('hidden');
+}
+
+function closeSummarizeModal() {
+  stopDictation();
+  modalSummarize.classList.add('hidden');
+}
+
+function runCustomPrompt() {
+  const v = customPromptInput.value.trim();
+  if (!v) {
+    toast('Wpisz lub podyktuj własne instrukcje');
+    return;
+  }
+  localStorage.setItem(LS.customPrompt, v);
+  closeSummarizeModal();
+  runSummary(v);
+}
+
 // ===== CLAUDE API =====
-async function summarize() {
+async function runSummary(promptText) {
   const key = localStorage.getItem(LS.apiKey);
   if (!key) {
     toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
@@ -381,7 +452,7 @@ async function summarize() {
   }
 
   const formattedNotes = notes.map((n, i) => `NOTATKA ${i + 1} [${n.timestamp}]: ${n.text}`).join('\n');
-  const prompt = SUMMARY_PROMPT + '\n\n' + formattedNotes;
+  const prompt = promptText + '\n\n' + formattedNotes;
 
   spinner.classList.remove('hidden');
 
@@ -449,6 +520,104 @@ function showSummary() {
 function showMain() {
   screenSummary.classList.add('hidden');
   screenMain.classList.remove('hidden');
+}
+
+// ===== DICTATION (do textarea własnych instrukcji) =====
+function toggleDictateCustomPrompt() {
+  if (dictation) stopDictation();
+  else startDictation();
+}
+
+function startDictation() {
+  if (!navigator.onLine) {
+    toast('Brak połączenia — dyktowanie wymaga internetu');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    toast('Twoja przeglądarka nie obsługuje rozpoznawania mowy');
+    return;
+  }
+
+  const rec = new SR();
+  rec.lang = 'pl-PL';
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+
+  const baseText = customPromptInput.value.trim();
+  let committed = '';
+  let active = true;
+
+  rec.onresult = (ev) => {
+    const finalsArr = [];
+    let interim = '';
+    for (let i = 0; i < ev.results.length; i++) {
+      const res = ev.results[i];
+      const t = res[0].transcript.trim();
+      if (!t) continue;
+      if (res.isFinal) finalsArr.push(t);
+      else interim += res[0].transcript;
+    }
+    let merged = '';
+    for (const f of finalsArr) {
+      if (!merged) { merged = f; continue; }
+      const fLow = f.toLowerCase();
+      const mLow = merged.toLowerCase();
+      if (fLow.startsWith(mLow)) merged = f;
+      else if (mLow.endsWith(fLow)) { /* skip */ }
+      else merged += ' ' + f;
+    }
+    const current = (committed + (merged ? merged + ' ' : '') + interim).replace(/\s+/g, ' ').trim();
+    customPromptInput.value = (baseText ? baseText + ' ' : '') + current;
+  };
+
+  rec.onerror = (e) => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      toast('Brak dostępu do mikrofonu');
+    } else if (e.error === 'network') {
+      toast('Błąd sieci — sprawdź internet');
+    } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      toast('Błąd rozpoznawania: ' + e.error);
+    }
+  };
+
+  rec.onend = () => {
+    // Promote merged finals to committed; restart if still active (długie dyktowanie)
+    const v = customPromptInput.value;
+    const newPart = baseText ? v.slice(baseText.length).trim() : v.trim();
+    committed = newPart ? newPart + ' ' : '';
+    if (active) {
+      try { rec.start(); } catch {}
+    } else {
+      finalizeDictation();
+    }
+  };
+
+  try {
+    rec.start();
+    dictation = {
+      rec,
+      stop: () => { active = false; try { rec.stop(); } catch {} }
+    };
+    btnDictatePrompt.classList.add('recording');
+    btnDictatePrompt.textContent = '⏹';
+  } catch {
+    toast('Nie udało się rozpocząć dyktowania');
+  }
+}
+
+function stopDictation() {
+  if (!dictation) return;
+  dictation.stop();
+}
+
+function finalizeDictation() {
+  dictation = null;
+  btnDictatePrompt.classList.remove('recording');
+  btnDictatePrompt.textContent = '🎙️';
+  const v = customPromptInput.value.trim();
+  if (v) localStorage.setItem(LS.customPrompt, v);
 }
 
 // ===== SETTINGS =====

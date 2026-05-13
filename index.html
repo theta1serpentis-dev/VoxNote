@@ -72,6 +72,31 @@
   </div>
 </div>
 
+<!-- ===== MODAL PODSUMOWANIA ===== -->
+<div id="modal-summarize" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Podsumowanie AI</h2>
+
+    <div class="tpl-section">
+      <p class="lbl">Wybierz szablon:</p>
+      <div id="tpl-list"></div>
+    </div>
+
+    <div class="custom-section">
+      <label for="custom-prompt-input" class="lbl">Własne instrukcje</label>
+      <div class="custom-prompt-wrap">
+        <textarea id="custom-prompt-input" placeholder="Np. Streść w 5 punktach po polsku..." rows="5"></textarea>
+        <button id="btn-dictate-prompt" class="icon-btn dictate-btn" aria-label="Dyktuj">🎙️</button>
+      </div>
+      <button id="btn-run-custom" class="action-btn primary">✨ Podsumuj z własnym promptem</button>
+    </div>
+
+    <div class="modal-actions">
+      <button id="btn-close-summarize" class="action-btn">Anuluj</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== SPINNER ===== -->
 <div id="spinner" class="spinner-overlay hidden">
   <div class="spinner"></div>
