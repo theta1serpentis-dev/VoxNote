@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#121212" />
+<meta name="theme-color" content="#13141A" />
 <title>VoxNote</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="preload" href="fonts/inter-tight-variable.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/source-serif-variable.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,7 +18,7 @@
 <main id="screen-main" class="screen">
   <header class="topbar">
     <input id="session-name" class="session-input" type="text" autocomplete="off" />
-    <button id="btn-settings" class="icon-btn" aria-label="Ustawienia">⚙️</button>
+    <button id="btn-settings" class="icon-btn" aria-label="Ustawienia"><span class="icon-slot" data-icon="settings"></span></button>
   </header>
 
   <section class="rec-area">
@@ -28,21 +30,21 @@
   </section>
 
   <section class="notes-section">
-    <div class="notes-counter">Zapisano: <span id="notes-count">0</span> notatek</div>
+    <div class="notes-counter">Zapisano <span id="notes-count">0</span> notatek</div>
     <ul id="notes-list" class="notes-list"></ul>
   </section>
 
   <section class="action-panel" id="action-panel">
-    <button id="btn-summarize" class="action-btn primary" disabled>✨ Podsumuj przez AI</button>
-    <button id="btn-export" class="action-btn" disabled>📤 Eksportuj notatki</button>
-    <button id="btn-new-session" class="action-btn danger" disabled>🗑️ Nowa sesja</button>
+    <button id="btn-summarize" class="action-btn primary" disabled><span class="icon-slot" data-icon="sparkles"></span>Podsumuj przez AI</button>
+    <button id="btn-export" class="action-btn" disabled><span class="icon-slot" data-icon="share"></span>Eksportuj notatki</button>
+    <button id="btn-new-session" class="action-btn danger" disabled><span class="icon-slot" data-icon="trash"></span>Nowa sesja</button>
   </section>
 </main>
 
 <!-- ===== EKRAN PODSUMOWANIA ===== -->
 <main id="screen-summary" class="screen hidden">
   <header class="topbar">
-    <button id="btn-back" class="icon-btn" aria-label="Wróć">←</button>
+    <button id="btn-back" class="icon-btn" aria-label="Wróć"><span class="icon-slot" data-icon="arrow-left"></span></button>
     <div class="summary-head">
       <div id="summary-session" class="summary-session"></div>
     </div>
@@ -51,9 +53,9 @@
     <pre id="summary-content" class="summary-content"></pre>
   </section>
   <section class="action-panel">
-    <button id="btn-share-summary" class="action-btn primary">📤 Udostępnij podsumowanie</button>
-    <button id="btn-share-all" class="action-btn">📤 Udostępnij wszystko</button>
-    <button id="btn-back-bottom" class="action-btn">← Wróć do notatek</button>
+    <button id="btn-share-summary" class="action-btn primary"><span class="icon-slot" data-icon="share"></span>Udostępnij podsumowanie</button>
+    <button id="btn-share-all" class="action-btn"><span class="icon-slot" data-icon="share"></span>Udostępnij wszystko</button>
+    <button id="btn-back-bottom" class="action-btn"><span class="icon-slot" data-icon="arrow-left"></span>Wróć do notatek</button>
   </section>
 </main>
 
@@ -63,7 +65,7 @@
     <h2>Ustawienia</h2>
     <label for="api-key-input" class="lbl">Klucz API Claude</label>
     <input id="api-key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
-    <p id="api-key-status" class="hint">⚠️ Brak klucza</p>
+    <p id="api-key-status" class="hint status-warn"><span class="icon-slot" data-icon="alert-circle"></span><span class="api-key-status-text">Brak klucza</span></p>
     <p class="hint small">Klucz przechowywany lokalnie na urządzeniu.</p>
     <div class="modal-actions">
       <button id="btn-save-key" class="action-btn primary">Zapisz</button>
@@ -74,11 +76,11 @@
 
 <!-- ===== MODAL PODSUMOWANIA ===== -->
 <div id="modal-summarize" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="modal-card">
+  <div class="modal-card wide">
     <h2>Podsumowanie AI</h2>
 
     <div class="tpl-section">
-      <p class="lbl">Wybierz szablon:</p>
+      <p class="lbl">Wybierz szablon</p>
       <div id="tpl-list"></div>
     </div>
 
@@ -86,9 +88,9 @@
       <label for="custom-prompt-input" class="lbl">Własne instrukcje</label>
       <div class="custom-prompt-wrap">
         <textarea id="custom-prompt-input" placeholder="Np. Streść w 5 punktach po polsku..." rows="5"></textarea>
-        <button id="btn-dictate-prompt" class="icon-btn dictate-btn" aria-label="Dyktuj">🎙️</button>
+        <button id="btn-dictate-prompt" class="icon-btn dictate-btn" aria-label="Dyktuj"><span class="icon-slot" data-icon="microphone"></span></button>
       </div>
-      <button id="btn-run-custom" class="action-btn primary">✨ Podsumuj z własnym promptem</button>
+      <button id="btn-run-custom" class="action-btn primary"><span class="icon-slot" data-icon="sparkles"></span>Podsumuj z własnym promptem</button>
     </div>
 
     <div class="modal-actions">
@@ -99,8 +101,10 @@
 
 <!-- ===== SPINNER ===== -->
 <div id="spinner" class="spinner-overlay hidden">
-  <div class="spinner"></div>
-  <p>Generuję podsumowanie...</p>
+  <div class="spinner-card">
+    <div class="spinner"></div>
+    <p>Generuję podsumowanie…</p>
+  </div>
 </div>
 
 <!-- ===== TOAST ===== -->

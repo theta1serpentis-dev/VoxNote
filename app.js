@@ -14,6 +14,30 @@ const LS = {
   templates: 'vn_templates'
 };
 
+// ===== ICONS (Phosphor Regular, stroke 2, rounded) =====
+const _svg = (paths, size = 18) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
+const ICONS = {
+  settings: _svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+  sparkles: _svg('<path d="M12 3v3M12 18v3M5 12H2M22 12h-3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="4"/>'),
+  share: _svg('<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" x2="15.4" y1="10.5" y2="6.5"/><line x1="8.6" x2="15.4" y1="13.5" y2="17.5"/>'),
+  trash: _svg('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>'),
+  'arrow-left': _svg('<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>'),
+  microphone: _svg('<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="9" x2="15" y1="22" y2="22"/>'),
+  stop: _svg('<rect width="14" height="14" x="5" y="5" rx="3" fill="currentColor" stroke="none"/>'),
+  'check-circle': _svg('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'),
+  'alert-circle': _svg('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
+  notebook: _svg('<path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M16 2v20"/>')
+};
+
+function paintIcons(root) {
+  (root || document).querySelectorAll('[data-icon]').forEach(el => {
+    const name = el.dataset.icon;
+    if (ICONS[name]) el.innerHTML = ICONS[name];
+  });
+}
+
 const SUMMARY_PROMPT = `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
 
 📍 MIEJSCE I KONTEKST
@@ -33,7 +57,7 @@ Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`;
 
 const BUILTIN_TEMPLATE = {
   id: 'builtin-notes',
-  label: '📝 Notatki',
+  label: 'Notatki',
   prompt: SUMMARY_PROMPT,
   builtin: true
 };
@@ -94,6 +118,7 @@ let dictation = null;
 
 // ===== INIT =====
 function init() {
+  paintIcons();
   sessionInput.value = sessionName;
   renderNotes();
   refreshActionPanel();
@@ -160,10 +185,11 @@ function renderNotes() {
         <div class="note-text"></div>
         <div class="note-time">${escapeHtml(n.timestamp)}</div>
       </div>
-      <button class="note-del" aria-label="Usuń notatkę">🗑️</button>
+      <button class="note-del" aria-label="Usuń notatkę"><span class="icon-slot" data-icon="trash"></span></button>
     `;
     li.querySelector('.note-text').textContent = n.text;
     li.querySelector('.note-del').addEventListener('click', () => deleteNote(n.id));
+    paintIcons(li);
     notesList.appendChild(li);
   });
   notesCount.textContent = notes.length;
@@ -399,7 +425,7 @@ function newSession() {
 function openSummarizeModal() {
   const key = localStorage.getItem(LS.apiKey);
   if (!key) {
-    toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
+    toast('Przejdź do Ustawień i wpisz klucz API');
     return;
   }
   if (!navigator.onLine) {
@@ -443,7 +469,7 @@ function runCustomPrompt() {
 async function runSummary(promptText) {
   const key = localStorage.getItem(LS.apiKey);
   if (!key) {
-    toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
+    toast('Przejdź do Ustawień i wpisz klucz API');
     return;
   }
   if (!navigator.onLine) {
@@ -601,7 +627,8 @@ function startDictation() {
       stop: () => { active = false; try { rec.stop(); } catch {} }
     };
     btnDictatePrompt.classList.add('recording');
-    btnDictatePrompt.textContent = '⏹';
+    const slotStop = btnDictatePrompt.querySelector('[data-icon]');
+    if (slotStop) { slotStop.dataset.icon = 'stop'; paintIcons(btnDictatePrompt); }
   } catch {
     toast('Nie udało się rozpocząć dyktowania');
   }
@@ -615,7 +642,8 @@ function stopDictation() {
 function finalizeDictation() {
   dictation = null;
   btnDictatePrompt.classList.remove('recording');
-  btnDictatePrompt.textContent = '🎙️';
+  const slotMic = btnDictatePrompt.querySelector('[data-icon]');
+  if (slotMic) { slotMic.dataset.icon = 'microphone'; paintIcons(btnDictatePrompt); }
   const v = customPromptInput.value.trim();
   if (v) localStorage.setItem(LS.customPrompt, v);
 }
@@ -635,7 +663,7 @@ function saveKey() {
   const v = apiKeyInput.value.trim();
   if (v) {
     localStorage.setItem(LS.apiKey, v);
-    toast('✅ Klucz zapisany');
+    toast('Klucz zapisany');
   } else {
     localStorage.removeItem(LS.apiKey);
     toast('Klucz usunięty');
@@ -646,7 +674,13 @@ function saveKey() {
 
 function refreshKeyStatus() {
   const has = !!localStorage.getItem(LS.apiKey);
-  apiKeyStatus.textContent = has ? '✅ Klucz zapisany' : '⚠️ Brak klucza';
+  apiKeyStatus.classList.toggle('status-ok', has);
+  apiKeyStatus.classList.toggle('status-warn', !has);
+  const slot = apiKeyStatus.querySelector('.icon-slot');
+  if (slot) slot.dataset.icon = has ? 'check-circle' : 'alert-circle';
+  const txt = apiKeyStatus.querySelector('.api-key-status-text');
+  if (txt) txt.textContent = has ? 'Klucz zapisany' : 'Brak klucza';
+  paintIcons(apiKeyStatus);
 }
 
 // ===== UTIL =====
