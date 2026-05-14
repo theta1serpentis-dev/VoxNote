@@ -14,6 +14,30 @@ const LS = {
   templates: 'vn_templates'
 };
 
+// ===== ICONS (Lucide-style, stroke 1.5) =====
+const _svg = (paths, size = 18) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
+const ICONS = {
+  settings: _svg('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'),
+  sparkles: _svg('<path d="m12 3-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.287L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.287Z"/><path d="M5 3v4"/><path d="M3 5h4"/><path d="M19 17v4"/><path d="M17 19h4"/>'),
+  share: _svg('<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/>'),
+  trash: _svg('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>'),
+  'arrow-left': _svg('<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'),
+  microphone: _svg('<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>'),
+  stop: _svg('<rect width="12" height="12" x="6" y="6" rx="1.5" fill="currentColor"/>'),
+  'check-circle': _svg('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
+  'alert-circle': _svg('<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'),
+  notebook: _svg('<path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M16 2v20"/>')
+};
+
+function paintIcons(root) {
+  (root || document).querySelectorAll('[data-icon]').forEach(el => {
+    const name = el.dataset.icon;
+    if (ICONS[name]) el.innerHTML = ICONS[name];
+  });
+}
+
 const SUMMARY_PROMPT = `Przeanalizuj poniższe notatki głosowe i przygotuj czytelne podsumowanie po polsku według struktury:
 
 📍 MIEJSCE I KONTEKST
@@ -33,7 +57,7 @@ Używaj punktów. Pomijaj sekcje, które nie mają treści. Oto notatki:`;
 
 const BUILTIN_TEMPLATE = {
   id: 'builtin-notes',
-  label: '📝 Notatki',
+  label: 'Notatki',
   prompt: SUMMARY_PROMPT,
   builtin: true
 };
@@ -94,6 +118,7 @@ let dictation = null;
 
 // ===== INIT =====
 function init() {
+  paintIcons();
   sessionInput.value = sessionName;
   renderNotes();
   refreshActionPanel();
@@ -160,10 +185,11 @@ function renderNotes() {
         <div class="note-text"></div>
         <div class="note-time">${escapeHtml(n.timestamp)}</div>
       </div>
-      <button class="note-del" aria-label="Usuń notatkę">🗑️</button>
+      <button class="note-del" aria-label="Usuń notatkę"><span class="icon-slot" data-icon="trash"></span></button>
     `;
     li.querySelector('.note-text').textContent = n.text;
     li.querySelector('.note-del').addEventListener('click', () => deleteNote(n.id));
+    paintIcons(li);
     notesList.appendChild(li);
   });
   notesCount.textContent = notes.length;
@@ -399,7 +425,7 @@ function newSession() {
 function openSummarizeModal() {
   const key = localStorage.getItem(LS.apiKey);
   if (!key) {
-    toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
+    toast('Przejdź do Ustawień i wpisz klucz API');
     return;
   }
   if (!navigator.onLine) {
@@ -443,7 +469,7 @@ function runCustomPrompt() {
 async function runSummary(promptText) {
   const key = localStorage.getItem(LS.apiKey);
   if (!key) {
-    toast('Przejdź do ⚙️ Ustawień i wpisz klucz API');
+    toast('Przejdź do Ustawień i wpisz klucz API');
     return;
   }
   if (!navigator.onLine) {
@@ -601,7 +627,8 @@ function startDictation() {
       stop: () => { active = false; try { rec.stop(); } catch {} }
     };
     btnDictatePrompt.classList.add('recording');
-    btnDictatePrompt.textContent = '⏹';
+    const slotStop = btnDictatePrompt.querySelector('[data-icon]');
+    if (slotStop) { slotStop.dataset.icon = 'stop'; paintIcons(btnDictatePrompt); }
   } catch {
     toast('Nie udało się rozpocząć dyktowania');
   }
@@ -615,7 +642,8 @@ function stopDictation() {
 function finalizeDictation() {
   dictation = null;
   btnDictatePrompt.classList.remove('recording');
-  btnDictatePrompt.textContent = '🎙️';
+  const slotMic = btnDictatePrompt.querySelector('[data-icon]');
+  if (slotMic) { slotMic.dataset.icon = 'microphone'; paintIcons(btnDictatePrompt); }
   const v = customPromptInput.value.trim();
   if (v) localStorage.setItem(LS.customPrompt, v);
 }
@@ -635,7 +663,7 @@ function saveKey() {
   const v = apiKeyInput.value.trim();
   if (v) {
     localStorage.setItem(LS.apiKey, v);
-    toast('✅ Klucz zapisany');
+    toast('Klucz zapisany');
   } else {
     localStorage.removeItem(LS.apiKey);
     toast('Klucz usunięty');
@@ -646,7 +674,13 @@ function saveKey() {
 
 function refreshKeyStatus() {
   const has = !!localStorage.getItem(LS.apiKey);
-  apiKeyStatus.textContent = has ? '✅ Klucz zapisany' : '⚠️ Brak klucza';
+  apiKeyStatus.classList.toggle('status-ok', has);
+  apiKeyStatus.classList.toggle('status-warn', !has);
+  const slot = apiKeyStatus.querySelector('.icon-slot');
+  if (slot) slot.dataset.icon = has ? 'check-circle' : 'alert-circle';
+  const txt = apiKeyStatus.querySelector('.api-key-status-text');
+  if (txt) txt.textContent = has ? 'Klucz zapisany' : 'Brak klucza';
+  paintIcons(apiKeyStatus);
 }
 
 // ===== UTIL =====
