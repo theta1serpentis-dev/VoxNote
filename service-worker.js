@@ -1,4 +1,4 @@
-const CACHE_NAME = 'voxnote-v5-soft';
+const CACHE_NAME = 'voxnote-v6-soft';
 const ASSETS = [
   './',
   './index.html',
