@@ -6,11 +6,43 @@ jednoręcznym.
 
 ## Funkcje
 
-- 🎙️ Nagrywanie głosu jednym przyciskiem (Web Speech API, język polski)
-- 💾 Notatki przechowywane lokalnie w przeglądarce (localStorage)
-- ✨ Podsumowanie AI przez Claude API z dwoma szablonami (Prawnik / Wycieczka)
-- 📤 Eksport surowych notatek lub podsumowania przez systemowe menu udostępniania Androida
-- 🌙 Ciemny motyw, duże dotykowe elementy, działa offline (cache zasobów)
+- Nagrywanie głosu jednym przyciskiem (Web Speech API, język polski)
+- Notatki przechowywane lokalnie w przeglądarce (localStorage) — brak konta, brak serwera
+- Podsumowanie AI przez Claude API z szablonem wbudowanym lub własnym promptem
+- Dyktowanie własnych instrukcji do podsumowania (głosowe wpisywanie promptu)
+- Eksport / udostępnianie przez systemowe menu Androida lub schowek (fallback)
+- Ciemny motyw, duże elementy dotykowe, tryb jednoręczny
+- Działa offline po pierwszym załadowaniu (cache zasobów przez service worker)
+
+## Szybki start
+
+```bash
+# Lokalnie (Python)
+python -m http.server 8080
+
+# Lokalnie (Node.js)
+npx serve .
+```
+
+Otwórz `http://localhost:8080`. Chrome / Edge zalecane (pełne wsparcie Web Speech API).
+
+## Użycie
+
+| Akcja | Opis |
+|-------|------|
+| Naciśnij duży przycisk | Rozpocznij nagrywanie |
+| Naciśnij ponownie | Zatrzymaj i zapisz notatkę |
+| ✨ Podsumuj przez AI | Wyślij notatki do Claude, wybierz szablon |
+| 📤 Eksportuj notatki | Udostępnij surowe notatki jako plik .txt |
+| 🗑️ Nowa sesja | Wyczyść notatki i zacznij od nowa |
+| ⚙️ Ustawienia | Wpisz / zmień klucz API Claude |
+
+## Dokumentacja techniczna
+
+Szczegóły architektury: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Pomysły na rozwój: [docs/IDEAS.md](docs/IDEAS.md)
+
+---
 
 ## 1. Deployment na GitHub Pages
 
