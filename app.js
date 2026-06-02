@@ -11,7 +11,8 @@ const LS = {
   apiKey: 'vn_api_key',
   sessionName: 'vn_session_name',
   customPrompt: 'vn_custom_prompt',
-  templates: 'vn_templates'
+  templates: 'vn_templates',
+  fontSize: 'vn_font_size'
 };
 
 // ===== ICONS (Lucide-style, stroke 1.5) =====
@@ -123,6 +124,7 @@ function init() {
   renderNotes();
   refreshActionPanel();
   refreshKeyStatus();
+  applyFontSize(parseInt(localStorage.getItem(LS.fontSize) || '14', 10));
   bindEvents();
   registerSW();
   prewarmMic();
@@ -155,6 +157,14 @@ function bindEvents() {
   btnSettings.addEventListener('click', openSettings);
   btnCloseSettings.addEventListener('click', closeSettings);
   btnSaveKey.addEventListener('click', saveKey);
+
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const size = parseInt(btn.dataset.size, 10);
+      localStorage.setItem(LS.fontSize, size);
+      applyFontSize(size);
+    });
+  });
 
   btnBack.addEventListener('click', showMain);
   btnBackBottom.addEventListener('click', showMain);
@@ -649,9 +659,17 @@ function finalizeDictation() {
 }
 
 // ===== SETTINGS =====
+function applyFontSize(size) {
+  document.documentElement.style.setProperty('--note-font-size', size + 'px');
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.size === String(size));
+  });
+}
+
 function openSettings() {
   apiKeyInput.value = localStorage.getItem(LS.apiKey) || '';
   refreshKeyStatus();
+  applyFontSize(parseInt(localStorage.getItem(LS.fontSize) || '14', 10));
   modal.classList.remove('hidden');
 }
 

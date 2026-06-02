@@ -40,6 +40,7 @@ VoxNote/
 | `vn_session_name` | String — nazwa aktualnej sesji nagraniowej |
 | `vn_custom_prompt` | String — ostatnio użyty własny prompt |
 | `vn_templates` | JSON — tablica szablonów zdefiniowanych przez użytkownika |
+| `vn_font_size` | Number — rozmiar czcionki notatek w px (14 lub 16; domyślnie 14) |
 
 ### Przepływ danych
 
@@ -97,6 +98,10 @@ Przy bardzo długich sesjach Web Speech API może samoczynnie zakończyć rozpoz
 ### System szablonów
 
 Jeden wbudowany szablon (`BUILTIN_TEMPLATE`) jest stałą w kodzie. Szablony użytkownika przechowywane są w `localStorage`. `getTemplates()` zwraca połączoną tablicę `[builtin, ...custom]`.
+
+### Ustawienia (`openSettings`, `applyFontSize`)
+
+Modal ustawień obsługuje dwa ustawienia użytkownika: klucz API oraz rozmiar czcionki notatek. `applyFontSize(size)` ustawia CSS custom property `--note-font-size` na elemencie `:root` i synchronizuje aktywny przycisk przełącznika. Wartość zapisywana jest natychmiast po kliknięciu przycisku (bez konieczności osobnego Zapisz).
 
 ### Wywołanie Claude API (`runSummary`)
 

@@ -296,7 +296,7 @@ button[aria-label] .icon-slot { margin-right: 0; }
 
 .note-text {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--note-font-size, 14px);
   line-height: 1.55;
   color: var(--text);
   letter-spacing: -0.01em;
@@ -494,6 +494,22 @@ button[aria-label] .icon-slot { margin-right: 0; }
 }
 
 .modal-actions .action-btn { flex: 1; }
+
+.font-size-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.font-size-btn {
+  flex: 1;
+  min-height: 40px;
+}
+
+.font-size-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
 
 /* ===== SUMMARIZE MODAL ===== */
 .modal-card.wide { max-width: 480px; }

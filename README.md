@@ -35,7 +35,7 @@ Otwórz `http://localhost:8080`. Chrome / Edge zalecane (pełne wsparcie Web Spe
 | ✨ Podsumuj przez AI | Wyślij notatki do Claude, wybierz szablon |
 | 📤 Eksportuj notatki | Udostępnij surowe notatki jako plik .txt |
 | 🗑️ Nowa sesja | Wyczyść notatki i zacznij od nowa |
-| ⚙️ Ustawienia | Wpisz / zmień klucz API Claude |
+| ⚙️ Ustawienia | Klucz API Claude; rozmiar czcionki notatek (14 / 16 px) |
 
 ## Dokumentacja techniczna
 

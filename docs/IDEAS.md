@@ -42,6 +42,14 @@ Punkt wejścia: `buildExportTxt()` / `buildCombinedTxt()`.
 
 Dodanie rozpoznawania komendy głosowej (np. „nowa sesja") podczas nagrywania, która wywołałaby `newSession()` bez konieczności dotykania ekranu.
 
+### [Średni] Nowoczesna ikona aplikacji
+
+Aktualna ikona PWA (pliki `icon-192.png` / `icon-512.png` z `manifest.json`) ma uproszczoną grafikę. Przeprojektowanie jej jako minimalistyczna forma — np. stylizowany mikrofon z falą dźwiękową lub połączenie bąbelka mowy z symbolem AI — poprawiłoby rozpoznawalność na ekranie domowym i w przełączniku aplikacji. Nowa ikona powinna być dostarczona w wersjach SVG (źródło) oraz PNG 192/512 px i uwzględniać `maskable` wariant do adaptacyjnych ikon Androida (pole `"purpose": "maskable"` w `manifest.json`).
+
+### [Średni] Modal z instrukcją obsługi
+
+Nowi użytkownicy nie wiedzą, że muszą wpisać klucz API ani jak korzystać z szablonów. Dodanie przycisku pomocy (ikona `?` w nagłówku) otwierającego modal z instrukcją krok po kroku: 1) pobierz klucz API z Anthropic Console, 2) wklej go w Ustawieniach, 3) zacznij nagrywać, 4) wygeneruj podsumowanie. Modal wyświetlany automatycznie przy pierwszym uruchomieniu (`localStorage` flaga `vn_onboarding_shown`) i dostępny ręcznie w dowolnym momencie. Implementacja: nowy element `<dialog id="help-modal">` w `index.html` + handler w `app.js`.
+
 ## Usprawnienia
 
 ### [Wysoki] Informacja o limicie localStorage
